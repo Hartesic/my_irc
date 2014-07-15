@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>my_irc</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/signin.css">
+  <link rel="stylesheet" href="/css/sticky-footer-navbar.css">
+  <style>
+  #messages { display: none; }
+  #messages-list { list-style-type: none; margin: 0; padding: 0; }
+  #messages-list li { padding: 5px 10px; }
+  #messages-list li:nth-child(odd) { background: #eee; }
+  </style>
+</head>
+<body>
+  <div class="container-fluid" id="join">
+    <div class="alert alert-danger" id="alert-error" role="alert" style="display: none;"></div>
+    <form class="form-signin" id="join-form" role="form">
+      <div class="form-group" id="name-group">
+        <h2 class="form-signin-heading">Choose username</h2>
+        <input type="text" class="form-control" id="name" placeholder="Username" required autofocus>
+      </div>
+      <div class="form-group" id="chan-group">
+        <h2 class="form-signin-heading">Choose chan</h2>
+        <input type="text" class="form-control" id="chan" placeholder="Channel" required>
+      </div>
+      <h2 class="form-signin-heading">Ready?</h2>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Join</button>
+    </form>
+  </div>
+  <div class="container-fluid" id="messages">
+    <div class="row">
+      <ul id="messages-list"></ul>
+      <div class="footer">
+        <div class="container-fluid">
+          <form id="message-form">
+            <div class="form-group">
+              <div class="col-md-11">
+                <input type="text" class="form-control" id="message" placeholder="Enter message">
+              </div>
+              <div class="col-md-1">
+                <button type="submit" class="btn btn-default">Send</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <script src="/js/jquery-2.1.1.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+  var socket = io();
+  var user;
+  $('#join-form').submit(function(){
+    $('#alert-error').css('display', 'none');
+    $('#chan-group').removeClass('has-error');
+    $('#name-group').removeClass('has-error');
+    socket.emit('join', {
+      name: $('#name').val(),
+      chan: $('#chan').val()
+    });
+    return false;
+  })
+  socket.on('ok', function(infos){
+    $('#join').fadeOut();
+    $('#messages').css('display', 'block');
+    user = infos;
+  });
+  socket.on('nope', function(input, text){
+    if (input == 'chan')
+      $('#chan-group').addClass('has-error');
+    else if (input == 'name')
+      $('#name-group').addClass('has-error');
+    $('#alert-error').fadeIn().text(text);
+  })
+  </script>
+</body>
+</html>

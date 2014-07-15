@@ -1,0 +1,8 @@
+{
+  "name": "my_irc-project",
+  "version": "0.0.1",
+  "description": "my_irc chat app",
+  "dependencies": {
+    "express": "^4.6.1"
+  }
+}
