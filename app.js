@@ -10,6 +10,15 @@ app.get('/', function(req, res){
 	res.sendfile('index.html');
 });
 
+var commands = new Object();
+commands['/nick'] = 'Use: "/nick [username]" Changes your actual username to [username]';
+commands['/list'] = 'Use: "/list ([search])" Lists all the channels or search for a channel containing [search]';
+commands['/join'] = 'Use: "/join [channel] ([username])" Joins the channel named [channel] with the username [username] (if provided) and leave the actual one (if no username is provided, your actual username will be used - if available in the targeted channel)';
+commands['/part'] = 'Use: "/part" Leaves the actual channel';
+commands['/users'] = 'Use: "/users" Lists every users connected on the actual channel';
+commands['/msg'] = 'Use: "/msg [user] [message]" Sends the message [message] to user named [user]';
+commands['/color'] = 'Use: "/color [color]" Changes the display color of your username (must be an hexadecimal value like "#123"';
+commands['/help'] = 'Use: "/help ([command])" Displays this help or the manual for the specific command [command]';
 var user_sockets = new Object();
 var chans = new Object();
 user_sockets['#test'] = new Object();
@@ -119,12 +128,13 @@ io.on('connection', function(socket){
 			return socket.emit('system', 'Your color has been changed to "<span style="color: ' + user.color + ';">' + user.color + '</span>"');
 		} else if (/^\/help/.test(msg)) {
 			if (/^\/help$/.test(msg))
-				return socket.emit('help', commands)
+				return socket.emit('helps', commands)
 			else if (/^\/help .+/.test(msg)){
-				if (typeof command = commands[msg.match(/^\/help (.+)/)] != 'undefined')
-					return socket.emit('help', commands[command]);
-			}
-			return ;
+				command = msg.match(/^\/help (.+)/)[1];
+				if (typeof command != 'undefined')
+					return socket.emit('help', commands['/' + command]);
+			} else
+				return socket.emit('system', 'Unkown command', 'system-red');
 		} else
 			return io.to(user.chan).emit('message', user.name, user.color, msg.replace(/</g, '&lt;').replace(/>/g, '&gt;'));
 	})
